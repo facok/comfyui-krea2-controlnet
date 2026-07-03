@@ -33,6 +33,8 @@ Native-style ComfyUI nodes for Krea2 Control LoRA inference. The plugin keeps Co
 
 For the public depth LoRA, a good starting point with a Depth Anything output is `channel_mode=grayscale`, `normalize=per_image_minmax`, and `invert=false`. Turn `invert` on only if the depth preview shows near objects as dark instead of white.
 
+Public depth LoRA weights: [Patil/Krea-2-depth-controlnet](https://huggingface.co/Patil/Krea-2-depth-controlnet)
+
 Other LoRA types such as canny, pose, lineart, or normal should usually use `channel_mode=rgb`, `normalize=none`, and `invert=false`.
 
 The control type is determined by the LoRA checkpoint. A depth LoRA needs a depth-like control image; pose, canny, and normal LoRAs need the matching preprocessor image.
@@ -42,3 +44,4 @@ The encode node returns normal VAE-space latents. The apply node performs the sa
 ## Acknowledgements
 
 Thanks to [Krea-2-controlnet](https://github.com/Tanmaypatil123/Krea-2-controlnet) for documenting the reference Krea2 control-LoRA inference pipeline.
+Thanks to [Patil/Krea-2-depth-controlnet](https://huggingface.co/Patil/Krea-2-depth-controlnet) for providing the public depth Control LoRA weights.

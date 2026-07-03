@@ -40,6 +40,8 @@
 
 如果 depth 预览里近处是黑色、远处是白色，再将 `invert` 改为 `true`。
 
+公开 depth LoRA 权重地址：[Patil/Krea-2-depth-controlnet](https://huggingface.co/Patil/Krea-2-depth-controlnet)
+
 其他控制类型，例如 canny、pose、lineart、normal，通常保持：
 
 - `channel_mode=rgb`
@@ -51,3 +53,4 @@
 ## 致谢
 
 感谢 [Krea-2-controlnet](https://github.com/Tanmaypatil123/Krea-2-controlnet) 对 Krea2 Control LoRA 参考推理流程的整理。
+感谢 [Patil/Krea-2-depth-controlnet](https://huggingface.co/Patil/Krea-2-depth-controlnet) 发布公开的 depth Control LoRA 权重。
