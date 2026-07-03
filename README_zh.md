@@ -1,7 +1,9 @@
 # ComfyUI Krea2 Control
 
 这是一个用于在 ComfyUI 中运行 Krea2 Control LoRA 的自定义节点。插件保留 ComfyUI 原生 Krea2 推理流程，只替换 LoRA checkpoint 中扩展后的输入投影层，并在采样时注入由 VAE 编码得到的控制图 latent。
+<img width="4259" height="2044" alt="Krea2t_00048_" src="https://github.com/user-attachments/assets/9b7390fb-420c-4b15-8c5b-88a24969280e" />
 
+<img width="4259" height="2044" alt="Krea2t_00026_" src="https://github.com/user-attachments/assets/429b7373-5716-420a-ba3e-aae261a580f6" />
 ## 节点
 
 - `Krea2 Control LoRA Loader`：从 `models/loras` 加载 Krea2 Control LoRA，将兼容的 block LoRA 权重应用到 Krea2 模型，替换输入投影层，并注册采样时需要的模型 wrapper。
@@ -9,7 +11,7 @@
 - `Krea2 Control Apply`：将控制 latent 转换到 Krea2 模型使用的 latent 空间，并挂载到已经加载 Control LoRA 的模型上。
 
 ## 基本流程
-
+<img width="2018" height="721" alt="8c831c0055122b8090e69e2dd97cbce5" src="https://github.com/user-attachments/assets/1859f3d0-eb56-4729-abc2-8757af77bc34" />
 1. 准备控制图。可以用普通 ComfyUI 节点加载图片，也可以连接 [`comfyui_controlnet_aux`](https://github.com/Fannovel16/comfyui_controlnet_aux) 的预处理器输出。
 2. 用 `Krea2 Control Image Encode` 编码控制图。保持默认的 `match_latent_size`，并把采样用的 latent 接到该节点的 `latent` 输入。
 3. 用 `Krea2 Control LoRA Loader` 加载对应的 Krea2 Control LoRA。
