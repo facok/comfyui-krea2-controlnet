@@ -24,7 +24,7 @@ Native-style ComfyUI nodes for Krea2 Control LoRA inference. The plugin keeps Co
 
 `Krea2 Control Apply` is required after the loader. If the Control LoRA is loaded without an attached control latent, sampling fails instead of silently running a partially patched model.
 
-Block LoRA weights are applied through ComfyUI's `ModelPatcher` so normal model loading, offload, and low-VRAM behavior still apply. The expanded input projection is enabled only during the Krea2 diffusion forward call and is restored immediately afterwards, so removing the node does not leave the base Krea2 path patched.
+Block LoRA weights are applied through ComfyUI's `ModelPatcher` so normal model loading, offload, and low-VRAM behavior still apply. During the Krea2 diffusion forward call, image tokens still pass through the native `first` projection so regular LoRA patches on the base model remain active; the Control LoRA contributes only the control-token half of the expanded projection. The temporary projection state is restored immediately afterwards, so removing the node does not leave the base Krea2 path patched.
 
 `match_latent_size` is the default because the reference flow resizes the control image to the final generation size before VAE encoding. Switch to `keep_control_image_size` only if you already resized and cropped the control image elsewhere.
 

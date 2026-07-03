@@ -71,6 +71,13 @@ class Krea2ControlInputProjection(nn.Module):
         control_tokens = comfy.utils.repeat_to_batch_size(control_tokens, image_tokens.shape[0])
         control_tokens = control_tokens.to(device=image_tokens.device, dtype=image_tokens.dtype)
 
+        original_first = self.original_first
+        if original_first is not None:
+            image_out = original_first(image_tokens)
+            control_weight = self.weight[:, self.image_features:]
+            control_weight = comfy.model_management.cast_to_device(control_weight, image_tokens.device, image_tokens.dtype)
+            return image_out + F.linear(control_tokens, control_weight, None)
+
         x = torch.cat((image_tokens, control_tokens), dim=-1)
         weight = comfy.model_management.cast_to_device(self.weight, x.device, x.dtype)
         bias = None

@@ -21,7 +21,7 @@
 
 `Krea2 Control LoRA Loader` 后必须接 `Krea2 Control Apply`。如果只加载 Control LoRA 但没有挂载控制 latent，采样会直接报错，避免静默运行一个只被部分 patch 的模型。
 
-Block LoRA 权重通过 ComfyUI 的 `ModelPatcher` 应用，因此模型加载、卸载和低显存行为仍然遵循 ComfyUI 原生机制。扩展后的输入投影层只在 Krea2 diffusion forward 调用期间临时启用，并在调用结束后立即恢复，删除节点后不会把基础 Krea2 生图路径留在 patch 状态。
+Block LoRA 权重通过 ComfyUI 的 `ModelPatcher` 应用，因此模型加载、卸载和低显存行为仍然遵循 ComfyUI 原生机制。在 Krea2 diffusion forward 调用期间，图像 token 仍然经过原生 `first` 投影层，因此普通 LoRA 对基础模型的 patch 仍会生效；Control LoRA 只贡献扩展投影中的 control-token 部分。临时投影状态会在调用结束后立即恢复，删除节点后不会把基础 Krea2 生图路径留在 patch 状态。
 
 `match_latent_size` 是默认设置。参考流程会先把控制图缩放到最终生成尺寸，再进行 VAE 编码；这里也按同样的顺序处理。如果你已经用其他 ComfyUI 图像节点提前完成了裁切和缩放，可以改用 `keep_control_image_size`。
 
