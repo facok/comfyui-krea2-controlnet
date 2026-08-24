@@ -63,11 +63,6 @@ class Krea2ControlInputProjection(nn.Module):
             if original_first is not None:
                 return original_first(image_tokens)
             raise RuntimeError("Krea2 control projection was called without control tokens.")
-        if control_tokens.shape[1] != image_tokens.shape[1]:
-            raise RuntimeError(
-                f"Krea2 control token count mismatch: image={image_tokens.shape[1]}, "
-                f"control={control_tokens.shape[1]}."
-            )
         control_tokens = comfy.utils.repeat_to_batch_size(control_tokens, image_tokens.shape[0])
         control_tokens = control_tokens.to(device=image_tokens.device, dtype=image_tokens.dtype)
 
@@ -76,7 +71,30 @@ class Krea2ControlInputProjection(nn.Module):
             image_out = original_first(image_tokens)
             control_weight = self.weight[:, self.image_features:]
             control_weight = comfy.model_management.cast_to_device(control_weight, image_tokens.device, image_tokens.dtype)
-            return image_out + F.linear(control_tokens, control_weight, None)
+            control_out = F.linear(control_tokens, control_weight, None)
+
+            # Adapt for Style Reference / Kontext multi-reference latents appended to sequence
+            img_len = image_out.shape[1]
+            ctrl_len = control_out.shape[1]
+            if img_len == ctrl_len:
+                return image_out + control_out
+            elif img_len > ctrl_len:
+                image_out = image_out.clone()
+                image_out[:, :ctrl_len] = image_out[:, :ctrl_len] + control_out
+                return image_out
+            else:
+                return image_out + control_out[:, :img_len]
+
+        if control_tokens.shape[1] < image_tokens.shape[1]:
+            pad_len = image_tokens.shape[1] - control_tokens.shape[1]
+            pad_zeros = torch.zeros(
+                (control_tokens.shape[0], pad_len, control_tokens.shape[2]),
+                device=control_tokens.device,
+                dtype=control_tokens.dtype
+            )
+            control_tokens = torch.cat((control_tokens, pad_zeros), dim=1)
+        elif control_tokens.shape[1] > image_tokens.shape[1]:
+            control_tokens = control_tokens[:, :image_tokens.shape[1]]
 
         x = torch.cat((image_tokens, control_tokens), dim=-1)
         weight = comfy.model_management.cast_to_device(self.weight, x.device, x.dtype)
