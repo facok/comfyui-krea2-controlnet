@@ -546,6 +546,10 @@ def krea2_control_wrapper(executor, control_projection, *args, **kwargs):
             diffusion_model.first = original_first if original_first is not None else previous_first
 
 
+def _is_disabled_attachment(attachment):
+    return isinstance(attachment, dict) and attachment.get("disabled", False)
+
+
 class Krea2ControlLoRALoader:
     def __init__(self):
         self.loaded_lora = None
@@ -565,10 +569,13 @@ class Krea2ControlLoRALoader:
     CATEGORY = "Krea2/control"
 
     def load_lora(self, model, lora_name, strength):
-        if strength == 0:
-            return (model,)
-        if model.get_attachment(WRAPPER_KEY) is not None:
+        existing = model.get_attachment(WRAPPER_KEY)
+        if existing is not None and not _is_disabled_attachment(existing):
             raise RuntimeError("Krea2 Control LoRA is already loaded on this MODEL. Use only one loader per model path.")
+        if strength == 0:
+            new_model = model.clone()
+            new_model.set_attachments(WRAPPER_KEY, {"disabled": True, "lora_name": lora_name, "strength": 0.0})
+            return (new_model,)
 
         lora_path = folder_paths.get_full_path_or_raise("loras", lora_name)
         state_dict = None
@@ -643,9 +650,13 @@ class Krea2ControlApply:
         if not torch.is_tensor(samples):
             raise RuntimeError("control_latent['samples'] must be a tensor.")
 
-        new_model = model.clone()
-        if new_model.get_attachment(WRAPPER_KEY) is None:
+        attachment = model.get_attachment(WRAPPER_KEY)
+        if attachment is None:
             raise RuntimeError("Krea2 Control Apply must receive the MODEL output from Krea2 Control LoRA Loader.")
+        if _is_disabled_attachment(attachment):
+            return (model,)
+
+        new_model = model.clone()
 
         samples = _process_control_latent_for_model(new_model, samples)
         transformer_options = new_model.model_options.setdefault("transformer_options", {})
